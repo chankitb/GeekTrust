@@ -62,7 +62,7 @@ public class TradeController {
     }
 
     private void pushToConsole(TradeExecuted tradeExecuted){
-        String[] trade = new String[] { tradeExecuted.getBuyOrderId(), tradeExecuted.getSellPrice().toString(),
+        String[] trade = new String[] { tradeExecuted.getBuyOrderId(), String.format("%.2f", tradeExecuted.getSellPrice()),
                 tradeExecuted.getQty().toString(), tradeExecuted.getSellOrderId() };
 
         System.out.println(Arrays.toString(trade)
