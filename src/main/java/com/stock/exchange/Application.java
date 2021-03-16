@@ -1,13 +1,19 @@
 package com.stock.exchange;
 
+import com.google.common.base.Splitter;
 import com.opencsv.CSVReader;
 import com.stock.exchange.model.TradeRequest;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Iterator;
+import java.util.Scanner;
 
 /**
  * Created by chankit.bansal on 16/03/21.
@@ -36,18 +42,26 @@ public class Application {
 
     private void ReadAndProcessOrder(String inputFilePath) {
         try {
-            CSVReader reader = new CSVReader(new FileReader(inputFilePath), ' ');
-            String[] line;
-            while ((line = reader.readNext()) != null) {
+            Path path = Paths.get(inputFilePath);
+            Scanner scanner = new Scanner(path);
+            while(scanner.hasNextLine()){
+                String line = scanner.nextLine();
+                Iterable<String> split = Splitter.on(' ')
+                        .omitEmptyStrings()
+                        .limit(6)
+                        .split(line);
+                Iterator<String> iterator = split.iterator();
                 TradeRequest tradeRequest = TradeRequest.builder()
-                        .orderId(line[0])
-                        .time(df.parse(line[1]))
-                        .stock(line[2])
-                        .type(TradeRequest.Type.valueOf(line[3]))
-                        .price(Double.valueOf(line[4]))
-                        .qty(Integer.valueOf(line[5])).build();
+                        .orderId(iterator.next())
+                        .time(df.parse(iterator.next()))
+                        .stock(iterator.next())
+                        .type(TradeRequest.Type.valueOf(iterator.next()))
+                        .price(Double.valueOf(iterator.next()))
+                        .qty(Integer.valueOf(iterator.next())).build();
+
                 tradeController.process(tradeRequest);
             }
+            scanner.close();
         } catch (IOException | ParseException e) {
             log.error("Error in parsing the input file, Only single space is allowed as separator" + e.getMessage());
         }
